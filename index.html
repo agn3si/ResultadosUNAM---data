@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Resultados UNAM 2026 — herramienta interactiva</title>
+<meta name="description" content="Explora la distribución de aciertos del examen de admisión a la UNAM, 2021-2026, por área y carrera.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/plotly.js-dist-min@2/plotly.min.js"></script>
+<style>
+  :root{
+    --paper: #ECE8DC;
+    --paper-deep: #E2DDCC;
+    --ink: #1B2430;
+    --ink-soft: #4B5563;
+    --line: #D2CBB4;
+    --historic: #9AA3AE;
+    --alert: #B23A2E;
+    --alert-soft: #E7CFC9;
+    --gold: #B8862E;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'IBM Plex Sans', system-ui, sans-serif;
+    line-height:1.5;
+  }
+  .wrap{max-width:960px;margin:0 auto;padding:0 24px;}
+  .mono{font-family:'IBM Plex Mono', monospace;}
+
+  /* --- bubble-sheet divider (elemento firma) --- */
+  .bubbles{
+    display:flex; gap:10px; align-items:center; justify-content:center;
+    padding:22px 0; user-select:none;
+  }
+  .bubbles span{
+    width:9px;height:9px;border-radius:50%;
+    border:1.4px solid var(--historic);
+    display:inline-block;
+  }
+  .bubbles span.filled{
+    background:var(--alert); border-color:var(--alert);
+  }
+
+  header{padding:56px 0 8px;}
+  .eyebrow{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:12.5px; letter-spacing:.12em; text-transform:uppercase;
+    color:var(--ink-soft); margin:0 0 18px;
+  }
+  .eyebrow::before{content:"folio·"; color:var(--alert);}
+  h1{
+    font-family:'Fraunces', serif;
+    font-weight:600;
+    font-size:clamp(32px, 5vw, 54px);
+    line-height:1.08;
+    margin:0 0 20px;
+    letter-spacing:-.01em;
+  }
+  .lede{
+    font-size:17px; color:var(--ink-soft); max-width:62ch; margin:0 0 6px;
+  }
+  .disclaimer{
+    font-size:13px; color:var(--ink-soft); border-left:2px solid var(--historic);
+    padding-left:12px; margin:22px 0 0; max-width:60ch;
+  }
+
+  .panel{
+    background:var(--paper-deep);
+    border:1px solid var(--line);
+    border-radius:4px;
+    padding:28px;
+    margin:36px 0;
+  }
+  .controls{
+    display:flex; flex-wrap:wrap; gap:18px; align-items:flex-end; margin-bottom:6px;
+  }
+  .field{display:flex; flex-direction:column; gap:6px; flex:1; min-width:200px;}
+  .field label{
+    font-family:'IBM Plex Mono', monospace; font-size:11.5px; letter-spacing:.08em;
+    text-transform:uppercase; color:var(--ink-soft);
+  }
+  select{
+    font-family:'IBM Plex Sans', sans-serif; font-size:15px;
+    padding:10px 12px; border-radius:3px; border:1.4px solid var(--line);
+    background:var(--paper); color:var(--ink);
+  }
+  select:focus, button:focus{outline:2px solid var(--alert); outline-offset:2px;}
+
+  #chart{width:100%; height:420px; margin-top:20px;}
+
+  .stats{
+    display:grid; grid-template-columns:repeat(auto-fit, minmax(140px,1fr));
+    gap:1px; background:var(--line); border:1px solid var(--line);
+    border-radius:4px; overflow:hidden; margin-top:24px;
+  }
+  .stat{background:var(--paper); padding:16px 18px;}
+  .stat .k{font-family:'IBM Plex Mono',monospace; font-size:11px; text-transform:uppercase; letter-spacing:.06em; color:var(--ink-soft);}
+  .stat .v{font-family:'Fraunces', serif; font-size:26px; font-weight:600; margin-top:4px;}
+  .stat .v.up{color:var(--alert);}
+
+  /* toggles de año: se ven como las burbujas de una hoja de respuestas */
+  .years{
+    display:flex; flex-wrap:wrap; gap:16px; margin-top:22px;
+    padding-top:18px; border-top:1px dashed var(--line);
+  }
+  .year-toggle{
+    display:inline-flex; align-items:center; gap:7px; cursor:pointer;
+    font-family:'IBM Plex Mono', monospace; font-size:13px; color:var(--ink-soft);
+  }
+  .year-toggle input{ position:absolute; opacity:0; width:1px; height:1px; }
+  .year-toggle .dot{
+    width:15px; height:15px; border-radius:50%;
+    border:2px solid var(--dot-color, var(--historic));
+    display:inline-block; transition:background-color .12s ease;
+  }
+  .year-toggle input:checked + .dot{ background:var(--dot-color, var(--historic)); }
+  .year-toggle input:focus-visible + .dot{ outline:2px solid var(--ink); outline-offset:2px; }
+  .year-toggle input:checked ~ .label{ color:var(--ink); }
+
+  footer{
+    padding:30px 0 60px; font-size:13.5px; color:var(--ink-soft);
+    border-top:1px solid var(--line); margin-top:40px;
+  }
+  footer a{color:var(--ink); text-decoration-color:var(--historic);}
+  footer p{max-width:70ch;}
+  .links{display:flex; gap:20px; flex-wrap:wrap; margin-top:14px; font-family:'IBM Plex Mono',monospace; font-size:13px;}
+
+  @media (max-width:600px){
+    header{padding:36px 0 4px;}
+    .panel{padding:18px;}
+    #chart{height:320px;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <p class="eyebrow">2021 — 2026 · admisión a licenciatura</p>
+    <h1>En 2026 subieron los aciertos del examen de admisión, en muchas carreras a la vez.</h1>
+    <p class="lede">Este es el dataset completo (todas las áreas, 2021-2026) para explorar ese cambio por carrera, con datos públicos de la DGAE. Elige un área, una carrera, y compara los años que quieras.</p>
+    <p class="disclaimer">Proyecto independiente, sin afiliación con la UNAM ni la DGAE. Los datos provienen de páginas públicas de resultados y no incluyen nombres — solo folios, aciertos y estatus. Esta página no afirma que hubo o no hubo irregularidades; solo presenta los datos.</p>
+  </header>
+
+  <div class="bubbles" aria-hidden="true">
+    <span></span><span></span><span></span><span></span><span class="filled"></span>
+  </div>
+
+  <div class="panel">
+    <div class="controls">
+      <div class="field">
+        <label for="area">Área</label>
+        <select id="area"></select>
+      </div>
+      <div class="field" style="flex:2;">
+        <label for="carrera">Carrera</label>
+        <select id="carrera"></select>
+      </div>
+    </div>
+
+    <div class="years" id="years"></div>
+
+    <div id="chart"></div>
+
+    <div class="stats" id="stats"></div>
+  </div>
+
+  <div class="bubbles" aria-hidden="true">
+    <span class="filled"></span><span></span><span></span><span></span><span></span>
+  </div>
+
+  <footer>
+    <p><strong>Metodología:</strong> se descartan folios sin aciertos registrados (aspirantes que no presentaron examen o fueron dados de baja). Cada línea muestra el % de aspirantes que presentaron examen ese año, no el número absoluto — porque la cantidad de aspirantes cambia entre carreras y años, y comparar conteos absolutos sería engañoso.</p>
+    <p>Fuente de los datos: Dirección General de Administración Escolar (DGAE), UNAM. Dataset y notebook completo, con metodología detallada y licencia CC BY 4.0, en el repositorio.</p>
+    <div class="links">
+      <a href="https://github.com/agn3si/ResultadosUNAM---data">↳ repositorio en GitHub</a>
+      <a href="https://github.com/agn3si/ResultadosUNAM---data/blob/main/notebooks/aciertos_por_carrera.ipynb">↳ notebook de análisis</a>
+      <a href="https://github.com/agn3si/ResultadosUNAM---data/blob/main/LICENSE-DATA.md">↳ licencia de datos</a>
+    </div>
+  </footer>
+</div>
+
+<script>
+let DATA = null;
+
+const areaSel = document.getElementById('area');
+const carreraSel = document.getElementById('carrera');
+const statsEl = document.getElementById('stats');
+
+fetch('dashboard_data.json')
+  .then(r => r.json())
+  .then(json => {
+    DATA = json;
+    initAreas();
+  })
+  .catch(err => {
+    document.getElementById('chart').innerHTML =
+      '<p style="color:var(--alert)">No se pudo cargar dashboard_data.json. Si estás viendo este archivo localmente (file://), ábrelo en su lugar desde la página publicada de GitHub Pages, o sirve la carpeta con un servidor local (ej. <span class="mono">python -m http.server</span>).</p>';
+  });
+
+function initAreas(){
+  const areas = Object.keys(DATA.data).sort((a,b)=>a-b);
+  areaSel.innerHTML = areas.map(a => `<option value="${a}">${a} — ${DATA.areas_nombres[a]}</option>`).join('');
+  // arrancamos en área 2 / MEDICO CIRUJANO si existe, si no la primera opción
+  if (areas.includes('2')) areaSel.value = '2';
+  fillCarreras();
+}
+
+function fillCarreras(){
+  const area = areaSel.value;
+  const carreras = Object.keys(DATA.data[area]).sort();
+  carreraSel.innerHTML = carreras.map(c => `<option value="${c}">${titleCase(c)}</option>`).join('');
+  if (carreras.includes('MEDICO CIRUJANO')) carreraSel.value = 'MEDICO CIRUJANO';
+  draw();
+}
+
+function titleCase(s){
+  return s.toLowerCase().replace(/(^|\s)\S/g, t => t.toUpperCase());
+}
+
+areaSel.addEventListener('change', fillCarreras);
+carreraSel.addEventListener('change', draw);
+
+// un color por año — los históricos en gama de grises, 2026 en rojo de alerta.
+// si en el futuro hay más años, se les asigna gris por defecto (ver colorFor).
+const YEAR_COLORS = {
+  '2021': '#C7CDD3', '2022': '#AEB6BF', '2023': '#95A0AB',
+  '2024': '#7C8998', '2025': '#5F6C7C', '2026': '#B23A2E'
+};
+function colorFor(anio){ return YEAR_COLORS[anio] || '#8A8A8A'; }
+
+// guarda qué años están marcados; se reinicia (todos marcados) cada vez que cambias de carrera
+let añosMarcados = new Set();
+
+function pintarCheckboxesDeAño(anios){
+  const yearsEl = document.getElementById('years');
+  yearsEl.innerHTML = anios.map(a => `
+    <label class="year-toggle" style="--dot-color:${colorFor(a)}">
+      <input type="checkbox" data-anio="${a}" ${añosMarcados.has(a) ? 'checked' : ''}>
+      <span class="dot"></span>
+      <span class="label">${a}</span>
+    </label>
+  `).join('');
+
+  yearsEl.querySelectorAll('input[type=checkbox]').forEach(cb => {
+    cb.addEventListener('change', () => {
+      if (cb.checked) añosMarcados.add(cb.dataset.anio);
+      else añosMarcados.delete(cb.dataset.anio);
+      draw(false); // false = no reiniciar los checkboxes, solo redibujar la gráfica
+    });
+  });
+}
+
+function draw(esCambioDeCarrera = true){
+  const area = areaSel.value;
+  const carrera = carreraSel.value;
+  const registro = DATA.data[area][carrera];
+  if (!registro) return;
+
+  const anios = Object.keys(registro).sort();
+
+  // al entrar a una carrera nueva, arrancamos con todos los años marcados
+  if (esCambioDeCarrera){
+    añosMarcados = new Set(anios);
+    pintarCheckboxesDeAño(anios);
+  }
+
+  const anMostrar = anios.filter(a => añosMarcados.has(a));
+
+  const binSet = new Set();
+  anMostrar.forEach(a => registro[a].bins.forEach(b => binSet.add(b)));
+  const bins = Array.from(binSet).sort((x,y)=>x-y);
+
+  const traces = anMostrar.map(anio => {
+    const serie = registro[anio];
+    const y = bins.map(b => {
+      const idx = serie.bins.indexOf(b);
+      return idx >= 0 ? serie.pct[idx] : 0;
+    });
+    return {
+      x: bins, y,
+      type:'scatter', mode:'lines',
+      line:{ color: colorFor(anio), width: anio === '2026' ? 3 : 1.6 },
+      name: anio
+    };
+  });
+
+  Plotly.newPlot('chart', traces, {
+    margin:{t:10,r:10,b:40,l:44},
+    xaxis:{title:'Aciertos', gridcolor:'#D2CBB4', zeroline:false},
+    yaxis:{title:'% de aspirantes (por año)', gridcolor:'#D2CBB4', zeroline:false},
+    plot_bgcolor:'rgba(0,0,0,0)',
+    paper_bgcolor:'rgba(0,0,0,0)',
+    font:{family:'IBM Plex Sans, sans-serif', color:'#1B2430'},
+    showlegend:true,
+    legend:{orientation:'h', y:-0.22}
+  }, {displayModeBar:false, responsive:true});
+
+  const historicos = anios.filter(a => a !== '2026');
+  renderStats(registro, historicos, anios.includes('2026'));
+}
+
+function renderStats(registro, historicos, tiene2026){
+  const promHist = historicos.length
+    ? (historicos.reduce((s,a)=>s+registro[a].promedio,0)/historicos.length)
+    : null;
+  const prom2026 = tiene2026 ? registro['2026'].promedio : null;
+  const delta = (promHist!=null && prom2026!=null) ? (prom2026-promHist) : null;
+
+  const asp2026 = tiene2026 ? registro['2026'].aspirantes : null;
+  const sel2026 = tiene2026 ? registro['2026'].seleccionados : null;
+
+  statsEl.innerHTML = `
+    <div class="stat"><div class="k">Promedio 2021–25</div><div class="v mono">${promHist!=null?promHist.toFixed(1):'—'}</div></div>
+    <div class="stat"><div class="k">Promedio 2026</div><div class="v mono ${delta>0?'up':''}">${prom2026!=null?prom2026.toFixed(1):'—'}</div></div>
+    <div class="stat"><div class="k">Cambio</div><div class="v mono ${delta>0?'up':''}">${delta!=null?(delta>0?'+':'')+delta.toFixed(1):'—'}</div></div>
+    <div class="stat"><div class="k">Aspirantes 2026</div><div class="v mono">${asp2026!=null?asp2026.toLocaleString('es-MX'):'—'}</div></div>
+    <div class="stat"><div class="k">Seleccionados 2026</div><div class="v mono">${sel2026!=null?sel2026.toLocaleString('es-MX'):'—'}</div></div>
+  `;
+}
+</script>
+</body>
+</html>

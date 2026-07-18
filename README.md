@@ -6,6 +6,18 @@ Dataset abierto con los resultados del examen de ingreso a licenciatura de la UN
 
 > ⚠️ **Aviso importante**: este es un proyecto independiente, **sin afiliación con la UNAM ni con la DGAE**. Los datos se obtuvieron mediante *web scraping* de páginas públicas de resultados y se ofrecen "tal cual", sin garantía de exactitud. Ver [Aviso legal](#aviso-legal--disclaimer) para más detalle.
 
+## ¿Por qué existe este proyecto?
+
+En 2026 el examen de admisión a licenciatura de la UNAM se aplicó **en línea por primera vez**, y varias personas empezaron a notar y compartir en redes sociales que la distribución de aciertos se recorrió de forma marcada hacia la derecha respecto a 2021–2025, en varias carreras a la vez.
+
+El problema: si alguien quisiera analizar o generar sus propias gráficas, no existía una base de datos pública que juntara los resultados de **todas** las áreas y carreras en un solo lugar.
+
+Este proyecto existe para resolver eso: **una base de datos abierta, accesible y limpia** (todas las áreas, 2021–2026) para que cualquier persona —periodista, estudiante, investigador— pueda hacer este tipo de análisis sin tener que reconstruir los datos desde cero cada vez. Mi intención es dar acceso a los datos para que el análisis lo pueda replicar, verificar o ampliar cualquiera, con metodología transparente.
+
+## Dashboard interactivo (sin instalar nada)
+
+Si solo quieres explorar los datos sin tocar código, hay una página web con gráficas interactivas por área y carrera: **[agn3si.github.io/ResultadosUNAM---data](https://agn3si.github.io/ResultadosUNAM---data/)**.
+
 ## Contenido del repositorio
 
 ```
@@ -36,28 +48,17 @@ Archivo: `data/processed/aciertos_unam_2021_2026.csv` — **1,027,716 filas**, u
 - Una misma carrera puede aparecer en varios planteles (p. ej. Ingeniería Civil en Facultad de Ingeniería, FES Acatlán y FES Aragón); si buscas comparar por escuela, filtra por `plantel`.
 - El corte de aciertos para ser `acreditado = S` se calcula por la propia DGAE sobre el conjunto agregado de planteles de cada carrera, no está en el dataset como columna explícita.
 
-## Cómo usar los datos
+## Cómo usar los datos directamente desde GitHub sin clonar:
 
-```python
-import pandas as pd
-df = pd.read_csv("data/processed/aciertos_unam_2021_2026.csv")
-```
-
-O directamente desde GitHub sin clonar:
 ```python
 url = "https://raw.githubusercontent.com/agn3si/ResultadosUNAM---data/main/data/processed/aciertos_unam_2021_2026.csv"
 df = pd.read_csv(url)
 ```
 
-Para correr el notebook de análisis:
-```bash
-pip install -r requirements.txt
-jupyter notebook notebooks/aciertos_por_carrera.ipynb
-```
 
 ## Cómo se obtuvieron los datos
 
-El script `src/fetch_and_parse.py` recorre las páginas públicas de resultados de la DGAE (`dgae.unam.mx`) para las 4 áreas y los 6 años disponibles, con una pausa de 1.5 segundos entre solicitudes para no sobrecargar el servidor. El HTML crudo se guarda localmente (no se distribuye en este repositorio) y se procesa a la tabla final en `data/processed/`.
+El script `src/fetch_and_parse.py` recorre las páginas públicas de resultados de la DGAE (`dgae.unam.mx`) para las 4 áreas y los 6 años disponibles. El HTML crudo se guarda localmente y se procesa a la tabla final en `data/processed/`.
 
 ## Cómo citar este dataset
 
