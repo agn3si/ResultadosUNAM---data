@@ -1,0 +1,22 @@
+cff-version: 1.2.0
+message: "Si usas este dataset o código, por favor cítalo de la siguiente manera / If you use this dataset or code, please cite it as below."
+title: "Resultados UNAM — Datos de admisión a licenciatura (2021–2026)"
+type: dataset
+authors:
+  - name: "Karen Arlet Castrillo Cruz"
+    alias: agn3si
+repository-code: "https://github.com/agn3si/ResultadosUNAM---data"
+license: "CC-BY-4.0"
+license-code: "MIT"
+date-released: 2026-07-18
+keywords:
+  - UNAM
+  - educación
+  - admisión universitaria
+  - datos abiertos
+  - México
+abstract: >
+  Dataset con los resultados del examen de ingreso a licenciatura de la UNAM
+  (2021-2026), obtenido de las páginas públicas de resultados de la Dirección
+  General de Administración Escolar (DGAE), para las 4 áreas de conocimiento.
+  Proyecto independiente, sin afiliación con la UNAM.
