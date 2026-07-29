@@ -1,0 +1,10 @@
+{
+  "programs_analyzed": 107,
+  "programs_skipped": 9,
+  "programs_failed": 0,
+  "correlation_fraction_vs_expected_score": {
+    "pearson_r": -0.06441,
+    "spearman_rho": -0.18428,
+    "linear_slope_fraction_per_score": -0.00197
+  }
+}

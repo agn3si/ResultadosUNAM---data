@@ -1,0 +1,9 @@
+# Inferred cheater fraction depending on baseline year: 2021-2025
+# Program: COMPOSICION
+# 
+usual_year,usual_mean_score,usual_score_sd,atypical_mean_score,atypical_score_sd,fraction_atypical
+2021,49.74,15.15,86.44,20.35,0.25366
+2022,51.32,16.43,89.14,19.69,0.20866
+2023,53.21,15.95,93.12,17.27,0.17824
+2024,60.47,20.86,114.50,2.29,0.04205
+2025,56.70,17.73,103.16,11.97,0.09276
