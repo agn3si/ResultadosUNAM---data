@@ -1,6 +1,6 @@
 {
-  "program": "SOCIOLOGIA",
-  "n_2026_observed": 453,
+  "program": "ACTUARIA",
+  "n_2026_observed": 2004,
   "number_of_fits": 5,
   "usual_parameter_years": [
     2021,
@@ -10,7 +10,7 @@
     2025
   ],
   "fraction_atypical": {
-    "mean": 0.89421,
-    "sample_sd": 0.02995
+    "mean": 0.36541,
+    "sample_sd": 0.02999
   }
 }

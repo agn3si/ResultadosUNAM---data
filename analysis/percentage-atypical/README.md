@@ -9,7 +9,7 @@ output folder:
 ```bash
 python3 analysis/percentage-atypical/analyze_program.py \
   --program "MATEMATICAS" \
-  --output-dir analysis/percentage-atypical/results_program_matematicas
+  --output-dir analysis/percentage-atypical/results_program_individual/results_program_matematicas
 ```
 
 The folder is created automatically and contains the fitted parameters, summary

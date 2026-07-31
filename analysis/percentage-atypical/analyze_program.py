@@ -32,7 +32,7 @@ from scipy.stats import betabinom
 N_QUESTIONS = 120
 BASE_DIR = Path(__file__).resolve().parents[2]
 DEFAULT_DATA = BASE_DIR / "data" / "processed" / "aciertos_unam_2021_2026.csv"
-DEFAULT_OUTPUT = Path(__file__).resolve().parent / "results_program"
+DEFAULT_OUTPUT = Path(__file__).resolve().parent / "results_program_individual" / "results_default"
 USUAL_YEARS = tuple(range(2021, 2026))
 
 
@@ -289,8 +289,8 @@ def analyze_program(
     interface for a future loop over programs.
     """
     program = program.strip().upper()
-    if output_dir is not None and not program == 'ACTUARIA':
-        output_dir = Path(__file__).resolve().parent / f"results_program_{program}"
+    if output_dir is not None:
+        output_dir = Path(__file__).resolve().parent / "result_program_individual" / f"results_program_{program}"
 
     if data_frame is None:
         data = pd.read_csv(data_path, usecols=["aciertos", "año", "area", "carrera"])
@@ -407,7 +407,7 @@ def analyze_program(
         },
     }
     if output_dir is not None:
-        (output_dir / "summary.json").write_text(
+        (output_dir / f"summary_{program}.json").write_text(
             json.dumps(summary, indent=2) + "\n", encoding="utf-8"
         )
         reference_index = (fraction - fraction.mean()).abs().idxmin()
@@ -423,13 +423,13 @@ def analyze_program(
             reference_year,
             fraction.mean(),
             fraction.std(ddof=1),
-            output_dir / "diagnostic.png",
+            output_dir / f"diagnostic_{program}.png",
         )
         save_parameter_plot(
             histogram_table,
             yearly_fits,
             mixture_fits,
-            output_dir / "parameters_by_year.png",
+            output_dir / f"parameters_by_year_{program}.png",
         )
 
     result = {
