@@ -32,7 +32,7 @@ from scipy.stats import betabinom
 N_QUESTIONS = 120
 BASE_DIR = Path(__file__).resolve().parents[2]
 DEFAULT_DATA = BASE_DIR / "data" / "processed" / "aciertos_unam_2021_2026.csv"
-DEFAULT_OUTPUT = Path(__file__).resolve().parent / "results_program_individual" / "results_default"
+DEFAULT_OUTPUT = Path(__file__).resolve().parent / "presentation"
 USUAL_YEARS = tuple(range(2021, 2026))
 
 
@@ -66,7 +66,7 @@ def fit_bb(hist: np.ndarray) -> dict[str, float]:
     """Maximum-likelihood beta-binomial fit to a histogram."""
     scores = np.arange(N_QUESTIONS + 1)
     sample_mean = np.dot(scores, hist) / hist.sum() / N_QUESTIONS
-    initial = np.log([max(sample_mean * 8, 0.1), max((1 - sample_mean) * 8, 0.1)])
+    initial = np.log([max(sample_mean * 10, 0.01), max((1 - sample_mean) * 10, 0.01)])
 
     def objective(log_parameters: np.ndarray) -> float:
         alpha, beta = np.exp(log_parameters)
@@ -182,8 +182,9 @@ def save_plot(
     fraction_mean: float,
     fraction_sd: float,
     output_path: Path,
+    plot_version=0,
 ) -> None:
-    fig, axes = plt.subplots(2, 1, figsize=(11, 9), constrained_layout=True)
+    fig, axes = plt.subplots(2, 1, figsize=(9, 7), constrained_layout=True)
     for year in range(2021, 2027):
         values = histogram_table.loc[histogram_table["year"] == year, "count"].to_numpy()
         axes[0].plot(np.arange(N_QUESTIONS + 1), values / values.sum(), label=str(year))
@@ -199,21 +200,21 @@ def save_plot(
     )
     fraction = reference_mixture["fraction_atypical"]
     axes[1].bar(scores, observed, width=1, alpha=0.35, label="2026 observed")
-    axes[1].plot(scores, (1 - fraction) * usual + fraction * atypical, label="Fitted mixture")
+    axes[1].plot(scores, (1 - fraction) * usual + fraction * atypical, label="Model: total")
     axes[1].plot(
         scores,
         (1 - fraction) * usual,
         "--",
-        label=f"Usual contribution ({100 * (1 - fraction_mean):.1f}% ± {100 * fraction_sd:.1f}%)",
+        label=f"Model: normal ({100 * (1 - fraction_mean):.0f}% ± {100 * fraction_sd:.0f}%)",
     )
     axes[1].plot(
         scores,
         fraction * atypical,
         "--",
-        label=f"Atypical contribution ({100 * fraction_mean:.1f}% ± {100 * fraction_sd:.1f}%)",
+        label=f'Model: "boosted" ({100 * fraction_mean:.0f}% ± {100 * fraction_sd:.0f}%)',
     )
     axes[1].set(
-        title=f"2026 mixture fit using {reference_year} as the usual component",
+        title=f"Modeling 2026 results with 2 populations",
         xlabel="Score",
         ylabel="Probability",
     )
@@ -227,6 +228,7 @@ def save_parameter_plot(
     yearly_fits: pd.DataFrame,
     mixture_fits: pd.DataFrame,
     output_path: Path,
+    plot_version=0,
 ) -> None:
     """Compare observed and fitted score means with one-standard-deviation bars."""
     scores = np.arange(N_QUESTIONS + 1)
@@ -241,7 +243,7 @@ def save_parameter_plot(
     atypical_mean = mixture_fits["atypical_mean_score"].mean()
     atypical_sd = mixture_fits["atypical_score_sd"].mean()
 
-    fig, ax = plt.subplots(figsize=(9, 5.5), constrained_layout=True)
+    fig, ax = plt.subplots(figsize=(7, 4.5), constrained_layout=True)
     ax.errorbar(
         observed["year"],
         observed["mean_score"],
@@ -252,44 +254,65 @@ def save_parameter_plot(
         alpha=0.75,
         label="Observed: mean ± 1σ",
     )
-    fitted_usual = ax.errorbar(
-        yearly_fits["year"]+0.15,
-        yearly_fits["mean_score"],
-        yerr=yearly_fits["score_sd"],
-        fmt="o--",
-        capsize=5,
-        color="navy",
-        label="Fitted usual BB: mean ± 1σ",
-    )
-    fitted_atypical = ax.errorbar(
-        [2026+0.15],
-        [atypical_mean],
-        yerr=[atypical_sd],
-        fmt="o--",
-        capsize=5,
-        markersize=8,
-        color="tab:red",
-        label="Fitted atypical BB: mean across 5 fits ± 1σ",
-    )
-    for errorbar in (fitted_usual, fitted_atypical):
-        for stem in errorbar[2]:
-            stem.set_linestyle("--")
-    ax.set(
-        title="Observed and fitted score distributions by year",
-        xlabel="Year",
-        ylabel="Score",
-        xticks=range(2021, 2027),
-        ylim=(0, N_QUESTIONS),
-    )
+    # fitted_usual = ax.errorbar(
+    #     yearly_fits["year"]+0.15,
+    #     yearly_fits["mean_score"],
+    #     yerr=yearly_fits["score_sd"],
+    #     fmt="o--",
+    #     capsize=5,
+    #     color="navy",
+    #     label="Fitted usual BB: mean ± 1σ",
+    # )
+    if plot_version==1:
+        expected_usual = ax.errorbar(
+            [2026+0.15],
+            yearly_fits["mean_score"].mean(),
+            yerr=yearly_fits["score_sd"].mean(),
+            fmt="o--",
+            capsize=5,
+            color="forestgreen",
+            label="Expected",
+        )
+        fitted_atypical = ax.errorbar(
+            [2026+0.15],
+            [atypical_mean],
+            yerr=[atypical_sd],
+            fmt="o--",
+            capsize=5,
+            markersize=8,
+            color="tab:red",
+            label='"Boosted" population',
+        )
+        # for stem in fitted_atypical[2]:
+        #     stem.set_linestyle("--")
+        for errorbar in (expected_usual, fitted_atypical):
+            for stem in errorbar[2]:
+                stem.set_linestyle("--")
+    if plot_version==0:
+        ax.set(
+            title="Observed score by year",
+            xlabel="Year",
+            ylabel="Score",
+            xticks=range(2021, 2027),
+            ylim=(0, N_QUESTIONS),
+        )
+    else:
+        ax.set(
+            title="Observed score by year",
+            xlabel="Year",
+            ylabel="Score",
+            xticks=range(2021, 2027),
+            ylim=(0, N_QUESTIONS),
+        )
     ax.grid(axis="y", alpha=0.25)
-    ax.legend()
+    ax.legend(loc='upper left')
     fig.savefig(output_path, dpi=160)
     plt.close(fig)
 
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--program", default="ACTUARIA", help="Exact carrera label")
+    parser.add_argument("--program", default="MEDICO CIRUJANO", help="Exact carrera label")
     parser.add_argument("--data", type=Path, default=DEFAULT_DATA)
     parser.add_argument("--output-dir", type=Path, default=DEFAULT_OUTPUT)
     parser.add_argument(
@@ -314,7 +337,7 @@ def analyze_program(
     """
     program = program.strip().upper()
     if output_dir is not None:
-        output_dir = Path(__file__).resolve().parent / "result_program_individual" / f"results_program_{program}"
+        output_dir = Path(__file__).resolve().parent / "presentation"
 
     if data_frame is None:
         data = pd.read_csv(data_path, usecols=["aciertos", "año", "area", "carrera"])
@@ -453,7 +476,15 @@ def analyze_program(
             histogram_table,
             yearly_fits,
             mixture_fits,
-            output_dir / f"parameters_by_year_{program}.png",
+            output_dir / f"parameters_by_year_{program}_0.png",
+            plot_version=0,
+        )
+        save_parameter_plot(
+            histogram_table,
+            yearly_fits,
+            mixture_fits,
+            output_dir / f"parameters_by_year_{program}_1.png",
+            plot_version=1,
         )
 
     result = {

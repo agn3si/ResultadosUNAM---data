@@ -1,6 +1,6 @@
 {
-  "program": "HISTORIA",
-  "n_2026_observed": 425,
+  "program": "MEDICO CIRUJANO",
+  "n_2026_observed": 22933,
   "number_of_fits": 5,
   "usual_parameter_years": [
     2021,
@@ -10,7 +10,7 @@
     2025
   ],
   "fraction_atypical": {
-    "mean": 0.34579,
-    "sample_sd": 0.40346
+    "mean": 0.3992,
+    "sample_sd": 0.02593
   }
 }
