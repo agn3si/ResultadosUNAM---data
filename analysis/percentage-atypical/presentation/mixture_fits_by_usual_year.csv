@@ -1,0 +1,9 @@
+# Inferred cheater fraction depending on baseline year: 2021-2025
+# Program: MEDICO CIRUJANO
+# 
+usual_year,usual_mean_score,usual_score_sd,atypical_mean_score,atypical_score_sd,fraction_atypical
+2021,60.39,20.34,103.30,10.20,0.41233
+2022,58.80,20.13,102.40,10.87,0.43648
+2023,61.72,20.93,104.10,9.63,0.38745
+2024,60.83,21.78,103.79,9.91,0.39087
+2025,61.93,22.36,104.44,9.44,0.36887

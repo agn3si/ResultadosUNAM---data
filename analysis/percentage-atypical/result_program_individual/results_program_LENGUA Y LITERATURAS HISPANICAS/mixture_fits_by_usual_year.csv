@@ -1,0 +1,9 @@
+# Inferred cheater fraction depending on baseline year: 2021-2025
+# Program: LENGUA Y LITERATURAS HISPANICAS
+# 
+usual_year,usual_mean_score,usual_score_sd,atypical_mean_score,atypical_score_sd,fraction_atypical
+2021,69.76,19.79,111.09,2.92,0.01183
+2022,66.24,18.80,96.67,10.84,0.10855
+2023,66.88,18.83,98.46,9.95,0.08840
+2024,67.02,19.91,80.10,19.72,0.19666
+2025,66.17,18.75,91.19,14.19,0.15581

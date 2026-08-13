@@ -1,0 +1,9 @@
+# Inferred cheater fraction depending on baseline year: 2021-2025
+# Program: ACTUARIA
+# 
+usual_year,usual_mean_score,usual_score_sd,atypical_mean_score,atypical_score_sd,fraction_atypical
+2021,68.49,21.77,102.53,8.83,0.33636
+2022,66.27,21.76,101.44,9.59,0.37942
+2023,65.21,20.39,101.07,9.78,0.41061
+2024,67.78,22.37,102.06,9.16,0.34485
+2025,67.61,21.50,102.15,9.09,0.35583

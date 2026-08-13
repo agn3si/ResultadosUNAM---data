@@ -1,0 +1,16 @@
+{
+  "program": "LENGUA Y LITERATURAS HISPANICAS",
+  "n_2026_observed": 231,
+  "number_of_fits": 5,
+  "usual_parameter_years": [
+    2021,
+    2022,
+    2023,
+    2024,
+    2025
+  ],
+  "fraction_atypical": {
+    "mean": 0.11225,
+    "sample_sd": 0.07016
+  }
+}
