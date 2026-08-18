@@ -1,0 +1,9 @@
+# Inferred cheater fraction depending on baseline year: 2021-2025
+# Program: FISICA
+# 
+usual_year,usual_mean_score,usual_score_sd,low_mean_score,low_score_sd,atypical_mean_score,atypical_score_sd,fraction_atypical
+2021,77.30,21.94,7.20,7.23,82.16,21.40,0.99199
+2022,75.15,21.88,7.21,7.25,82.16,21.40,0.99199
+2023,75.14,21.15,7.21,7.25,82.16,21.40,0.99199
+2024,75.96,22.22,7.21,7.25,82.16,21.40,0.99199
+2025,75.09,21.63,7.21,7.25,82.16,21.40,0.99199

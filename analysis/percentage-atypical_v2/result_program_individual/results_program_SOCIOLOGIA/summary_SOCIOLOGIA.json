@@ -1,0 +1,16 @@
+{
+  "program": "SOCIOLOGIA",
+  "n_2026_observed": 453,
+  "number_of_fits": 5,
+  "usual_parameter_years": [
+    2021,
+    2022,
+    2023,
+    2024,
+    2025
+  ],
+  "fraction_atypical": {
+    "mean": 0.81665,
+    "sample_sd": 0.15583
+  }
+}
